@@ -1,0 +1,23 @@
+# ビルド結果を無視
+bin/
+obj/
+
+# ユーザーごとの設定
+*.user
+*.suo
+
+# Visual Studioのローカル設定
+.vs/
+
+# 一時ファイル・ログ
+*.log
+*.cache
+*.pdb
+
+# OSごとの一時ファイル
+Thumbs.db
+.DS_Store
+
+# シークレット設定ファイル（必要に応じて）
+appsettings.json
+App.config
