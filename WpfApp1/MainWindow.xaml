@@ -10,8 +10,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBox Text="{Binding InputValue.Value, UpdateSourceTrigger=PropertyChanged}" Width="400" Height="40" Grid.Row="0"/>
-        <Label Content="{Binding OutputValue.Value}" Height="40" Width="400" Grid.Row="1"/>
+        <Button Command="{Binding DisplayCommand}" Content="表示" Height="40" Width="400" Grid.Row="1"/>
+        <Label Content="{Binding OutputValue.Value}" Height="40" Width="400" Grid.Row="2"/>
+        <Button Command="{Binding DeleteCommand}" Content="削除" Height="40" Width="400" Grid.Row="3"/>
     </Grid>
 </Window>
