@@ -5,17 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <TextBox Text="{Binding InputValue.Value, UpdateSourceTrigger=PropertyChanged}" Width="400" Height="40" Grid.Row="0"/>
-        <Button Command="{Binding DisplayCommand}" Content="表示" Height="40" Width="400" Grid.Row="1"/>
-        <Label Content="{Binding OutputValue.Value}" Height="40" Width="400" Grid.Row="2"/>
-        <Button Command="{Binding DeleteCommand}" Content="削除" Height="40" Width="400" Grid.Row="3"/>
-    </Grid>
+        Title="MainWindow" Height="500" Width="800">
+
+    <DockPanel Margin="10">
+        <!-- 上部のボタン -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="新規登録" Command="{Binding AddTaskCommand}" Width="100" Margin="5"/>
+            <Button Content="削除" Command="{Binding DeleteTaskCommand}" Width="100" Margin="5"/>
+        </StackPanel>
+
+        <!-- タスク一覧 -->
+        <DataGrid ItemsSource="{Binding Tasks}"
+                  SelectedItem="{Binding SelectedTask.Value}"
+                  AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="タスク名" Binding="{Binding TaskName.Value}" />
+                <DataGridTextColumn Header="開始日" Binding="{Binding StartDate.Value, StringFormat=yyyy/MM/dd}" />
+                <DataGridTextColumn Header="終了日" Binding="{Binding EndDate.Value, StringFormat=yyyy/MM/dd}" />
+                <DataGridTextColumn Header="状態" Binding="{Binding Status.Value}" />
+                <DataGridTextColumn Header="予定工数" Binding="{Binding PlannedHours.Value}" />
+                <DataGridTextColumn Header="実績工数" Binding="{Binding ActualHours.Value}" />
+                <DataGridTextColumn Header="乖離" Binding="{Binding Gap.Value}" />
+                <DataGridTemplateColumn Header="編集">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="編集" 
+                                    Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                    CommandParameter="{Binding}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
 </Window>
