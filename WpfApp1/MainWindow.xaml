@@ -16,7 +16,7 @@
 
         <!-- タスク一覧 -->
         <DataGrid ItemsSource="{Binding Tasks}"
-                  SelectedItem="{Binding SelectedTask.Value}"
+                  SelectedItem="{Binding SelectedTask.Value, Mode=OneWayToSource}"
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="タスク名" Binding="{Binding TaskName.Value}" />

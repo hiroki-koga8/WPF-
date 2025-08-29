@@ -13,6 +13,7 @@ public class ViewModel
 
 	public ReactiveCommand AddTaskCommand { get; }
 	public ReactiveCommand DeleteTaskCommand { get; }
+	public ReactiveCommand EditTaskCommand { get; }
 
 	public ReactiveProperty<string> TaskName { get; set; } = new();
 	public ReactiveProperty<DateTime> StartDate { get; set; } = new(DateTime.Now);
@@ -51,6 +52,8 @@ public class ViewModel
 
 		DeleteTaskCommand = SelectedTask.Select(task => task != null).ToReactiveCommand();
 		DeleteTaskCommand.Subscribe(OnDelete);
+		EditTaskCommand = SelectedTask.Select(task => task != null).ToReactiveCommand();
+		EditTaskCommand.Subscribe(OnEdit);
 	}
 
 	/// <summary>
@@ -61,6 +64,24 @@ public class ViewModel
 	{
 		if (SelectedTask.Value != null)
 			Tasks.Remove(SelectedTask.Value);
+	}
+
+	/// <summary>
+	/// 編集時の処理
+	/// </summary>
+	private void OnEdit()
+	{
+		if (SelectedTask.Value == null)
+			return;
+
+		// 編集用にウィンドウを開く
+		var editWindow = new Views.EditTaskWindow(SelectedTask.Value);
+		var result = editWindow.ShowDialog();
+
+		if (result == true)
+		{
+			// OKが押されたのでデータは既に更新されている（ReactivePropertyがバインド済みのため）
+		}
 	}
 
 
