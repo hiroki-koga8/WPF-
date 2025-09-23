@@ -30,7 +30,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Content="編集" 
-                                    Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                    Command="{Binding DataContext.EditTaskCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                     CommandParameter="{Binding}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
