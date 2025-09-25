@@ -19,13 +19,15 @@
                   SelectedItem="{Binding SelectedTask.Value, Mode=OneWayToSource}"
                   AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="タスク名" Binding="{Binding TaskName.Value}" />
+                <DataGridTextColumn Header="タスク名" Binding="{Binding TaskName.Value}" Width="100"/>
                 <DataGridTextColumn Header="開始日" Binding="{Binding StartDate.Value, StringFormat=yyyy/MM/dd}" />
                 <DataGridTextColumn Header="終了日" Binding="{Binding EndDate.Value, StringFormat=yyyy/MM/dd}" />
+                <DataGridTextColumn Header="説明" Binding="{Binding Description.Value}" Width="150"/>
                 <DataGridTextColumn Header="状態" Binding="{Binding Status.Value}" />
                 <DataGridTextColumn Header="予定工数" Binding="{Binding PlannedHours.Value}" />
                 <DataGridTextColumn Header="実績工数" Binding="{Binding ActualHours.Value}" />
                 <DataGridTextColumn Header="乖離" Binding="{Binding Gap.Value}" />
+                <DataGridTextColumn Header="備考" Binding="{Binding Remarks.Value}" Width="100"/>
                 <DataGridTemplateColumn Header="編集">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

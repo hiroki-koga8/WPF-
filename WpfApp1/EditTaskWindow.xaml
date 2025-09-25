@@ -42,9 +42,9 @@
 
         <StackPanel Orientation="Horizontal" Margin="0,5" Grid.Row="5">
             <TextBlock Text="予定時間:" Width="80"/>
-            <TextBox Text="{Binding PlannedHours.Value, Mode=TwoWay}" Width="100"/>
+            <TextBox Text="{Binding PlannedHours.Value, Mode=TwoWay}" Width="80"/>
             <TextBlock Text="実績時間:" Width="80" Margin="10,0,0,0"/>
-            <TextBox Text="{Binding ActualHours.Value, Mode=TwoWay}" Width="100"/>
+            <TextBox Text="{Binding ActualHours.Value, Mode=TwoWay}" Width="80"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,5" Grid.Row="6">
