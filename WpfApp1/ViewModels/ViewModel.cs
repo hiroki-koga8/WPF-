@@ -17,7 +17,7 @@ public class ViewModel
 	public ReactiveCommand AddTaskCommand { get; }
 	public ReactiveCommand DeleteTaskCommand { get; }
 	public ReactiveCommand EditTaskCommand { get; }
-
+	public ReactiveCommand ExportToExcelCommand { get; }
 
 	/// <summary>
 	/// コンストラクタ
@@ -33,6 +33,8 @@ public class ViewModel
 		DeleteTaskCommand.Subscribe(OnDeleteAsync);
 		EditTaskCommand = SelectedTask.Select(task => task != null).ToReactiveCommand();
 		EditTaskCommand.Subscribe(OnEditAsync);
+		ExportToExcelCommand = new ReactiveCommand();
+		ExportToExcelCommand.Subscribe(OnExportToExcel);
 
 		_ = LoadTasksFromDbAsync(); // 非同期だが待たない
 	}
@@ -183,6 +185,66 @@ public class ViewModel
 
 				await db.SaveChangesAsync();
 			}
+		}
+	}
+
+	/// <summary>
+	/// Excelファイル出力処理
+	/// </summary>
+	private void OnExportToExcel()
+	{
+		try
+		{
+			var dialog = new Microsoft.Win32.SaveFileDialog
+			{
+				Filter = "Excel ファイル (*.xlsx)|*.xlsx",
+				FileName = $"Tasks_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
+			};
+
+			if (dialog.ShowDialog() != true)
+				return;
+
+			using var workbook = new ClosedXML.Excel.XLWorkbook();
+			var worksheet = workbook.Worksheets.Add("Tasks");
+
+			// ヘッダー
+			worksheet.Cell(1, 1).Value = "タスク名";
+			worksheet.Cell(1, 2).Value = "開始日";
+			worksheet.Cell(1, 3).Value = "終了日";
+			worksheet.Cell(1, 4).Value = "状態";
+			worksheet.Cell(1, 5).Value = "予定工数";
+			worksheet.Cell(1, 6).Value = "実績工数";
+			worksheet.Cell(1, 7).Value = "差分";
+			worksheet.Cell(1, 8).Value = "説明";
+			worksheet.Cell(1, 9).Value = "備考";
+
+			// データ行
+			int row = 2;
+			foreach (var task in Tasks)
+			{
+				worksheet.Cell(row, 1).Value = task.TaskName.Value;
+				worksheet.Cell(row, 2).Value = task.StartDate.Value;
+				worksheet.Cell(row, 3).Value = task.EndDate.Value;
+				worksheet.Cell(row, 4).Value = task.Status.Value;
+				worksheet.Cell(row, 5).Value = task.PlannedHours.Value;
+				worksheet.Cell(row, 6).Value = task.ActualHours.Value;
+				worksheet.Cell(row, 7).Value = task.Gap.Value;
+				worksheet.Cell(row, 8).Value = task.Description.Value;
+				worksheet.Cell(row, 9).Value = task.Remarks.Value;
+
+				row++;
+			}
+
+			// 列幅を自動調整
+			worksheet.Columns().AdjustToContents();
+
+			workbook.SaveAs(dialog.FileName);
+
+			MessageBox.Show("Excelファイルに出力しました。", "完了", MessageBoxButton.OK, MessageBoxImage.Information);
+		}
+		catch (Exception ex)
+		{
+			MessageBox.Show($"Excel出力中にエラーが発生しました：{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 	}
 
