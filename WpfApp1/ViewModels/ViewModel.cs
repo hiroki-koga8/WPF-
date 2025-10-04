@@ -127,6 +127,8 @@ public class ViewModel
 			db.Tasks.Add(entity);
 			await db.SaveChangesAsync();
 
+			newTask.Id = entity.Id;
+
 			AllTasks.Add(newTask);
 			ExecuteFilter();
 		}
