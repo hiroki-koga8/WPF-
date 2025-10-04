@@ -65,6 +65,7 @@ public class ViewModel
 			{
 				var taskItem = new TaskItem
 				{
+					Id = entity.Id,
 					TaskName = { Value = entity.TaskName ?? string.Empty },
 					StartDate = { Value = entity.StartDate },
 					EndDate = { Value = entity.EndDate },
@@ -185,9 +186,7 @@ public class ViewModel
 			using var db = new TaskDbContext();
 
 			// DB のレコードを取得
-			var entity = await db.Tasks
-				.FirstOrDefaultAsync(t => t.TaskName == task.TaskName.Value
-									   && t.StartDate == task.StartDate.Value);
+			var entity = await db.Tasks.FirstOrDefaultAsync(t => t.Id == task.Id);
 
 			if (entity != null)
 			{
