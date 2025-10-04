@@ -36,8 +36,11 @@
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,5" Grid.Row="4">
-            <TextBlock Text="ステータス:" Width="80"/>
-            <TextBox Text="{Binding Status.Value, Mode=TwoWay}" Width="250"/>
+            <TextBlock Text="状態:" Width="80"/>
+            <ComboBox x:Name="StatusComboBox"
+              Width="250"
+              ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=StatusOptions}"
+              SelectedItem="{Binding Status.Value, Mode=TwoWay}" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,5" Grid.Row="5">

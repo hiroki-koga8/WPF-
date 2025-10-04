@@ -5,6 +5,8 @@ namespace WpfApp1.Views
 {
 	public partial class EditTaskWindow : Window
 	{
+		public List<string> StatusOptions { get; } = new() { "未対応", "対応中", "完了" };
+
 		public EditTaskWindow(ViewModel.TaskItem taskItem)
 		{
 			InitializeComponent();

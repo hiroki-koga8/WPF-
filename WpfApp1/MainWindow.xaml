@@ -11,13 +11,25 @@
         <!-- 上部のボタン -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="新規登録" Command="{Binding AddTaskCommand}" Width="100" Margin="5"/>
-            <Button Content="Excel出力" Command="{Binding ExportToExcelCommand}" Width="100" Height="30" Margin="5"/>
+        </StackPanel>
+
+
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+            <!-- 日付フィルター -->
+            <TextBlock Text="基準日:" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <DatePicker SelectedDate="{Binding FilterDate.Value, Mode=TwoWay}" Width="120" Margin="5"/>
+            <!-- 状態フィルター -->
+            <TextBlock Text="状態:" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <ComboBox ItemsSource="{Binding FilterOptions}" SelectedItem="{Binding SelectedStatusFilter.Value, Mode=TwoWay}" Width="120" Margin="5"/>
+            <Button Content="表示" Command="{Binding FilterCommand}" Width="100" Margin="5"/>
+            <Button Content="Excel出力" Command="{Binding ExportToExcelCommand}" Width="100" Margin="5" />
         </StackPanel>
 
         <!-- タスク一覧 -->
-        <DataGrid ItemsSource="{Binding Tasks}"
+        <DataGrid ItemsSource="{Binding FilteredTasks}"
                   SelectedItem="{Binding SelectedTask.Value, Mode=OneWayToSource}"
-                  AutoGenerateColumns="False">
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="タスク名" Binding="{Binding TaskName.Value}" Width="100"/>
                 <DataGridTextColumn Header="開始日" Binding="{Binding StartDate.Value, StringFormat=yyyy/MM/dd}" />

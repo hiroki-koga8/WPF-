@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reactive.Bindings;
+using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
@@ -8,23 +9,30 @@ namespace WpfApp1.ViewModels;
 
 public class ViewModel
 {
-	public ReactiveCollection<TaskItem> Tasks { get; } = new();
+	// 全件保持用
+	public ReactiveCollection<TaskItem> AllTasks { get; } = new();
+
+	// フィルター済み表示用
+	public ReactiveCollection<TaskItem> FilteredTasks { get; } = new();
 	public ReactiveProperty<TaskItem> SelectedTask { get; } = new();
 
-	public ReactiveProperty<string> Filter { get; } = new("すべて");
+	public ReactiveProperty<string> SelectedStatusFilter { get; } = new("すべて");
+	public ReactiveProperty<DateTime?> FilterDate { get; } = new(DateTime.Today);
 
 	public ReactiveCommand LoadCommand { get; }
 	public ReactiveCommand AddTaskCommand { get; }
+	public ReactiveCommand FilterCommand { get; } = new();
 	public ReactiveCommand DeleteTaskCommand { get; }
 	public ReactiveCommand EditTaskCommand { get; }
 	public ReactiveCommand ExportToExcelCommand { get; }
+
+	public ReadOnlyCollection<string> FilterOptions { get; } = new(new[] { "すべて", "未対応", "対応中", "完了" });
 
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
 	public ViewModel()
 	{
-		Tasks = new ReactiveCollection<TaskItem>();
 		LoadCommand = new ReactiveCommand();
 		LoadCommand.Subscribe(async () => await LoadTasksFromDbAsync());
 		AddTaskCommand = new ReactiveCommand();
@@ -35,6 +43,8 @@ public class ViewModel
 		EditTaskCommand.Subscribe(OnEditAsync);
 		ExportToExcelCommand = new ReactiveCommand();
 		ExportToExcelCommand.Subscribe(OnExportToExcel);
+
+		FilterCommand.Subscribe(ExecuteFilter);
 
 		_ = LoadTasksFromDbAsync(); // 非同期だが待たない
 	}
@@ -47,17 +57,13 @@ public class ViewModel
 	{
 		try
 		{
-			//MessageBox.Show("DB読み込み開始");
-
 			using var db = new TaskDbContext();
 			var entities = await db.Tasks.ToListAsync();
 
-			//MessageBox.Show($"DBから {entities.Count} 件取得");
-
-			Tasks.Clear();
+			AllTasks.Clear();
 			foreach (var entity in entities)
 			{
-				Tasks.Add(new TaskItem
+				var taskItem = new TaskItem
 				{
 					TaskName = { Value = entity.TaskName ?? string.Empty },
 					StartDate = { Value = entity.StartDate },
@@ -67,10 +73,12 @@ public class ViewModel
 					PlannedHours = { Value = entity.PlannedHours ?? 0 },
 					ActualHours = { Value = entity.ActualHours ?? 0 },
 					Remarks = { Value = entity.Remarks ?? string.Empty }
-				});
+				};
+
+				AllTasks.Add(taskItem);
 			}
 
-			//MessageBox.Show("読み込み完了");
+			ExecuteFilter();
 		}
 		catch (Exception ex)
 		{
@@ -118,7 +126,8 @@ public class ViewModel
 			db.Tasks.Add(entity);
 			await db.SaveChangesAsync();
 
-			Tasks.Add(newTask);
+			AllTasks.Add(newTask);
+			ExecuteFilter();
 		}
 	}
 
@@ -131,8 +140,15 @@ public class ViewModel
 		var task = SelectedTask.Value;
 		if (task == null)
 		{
+			// ここは通らない想定
 			return;
 		}
+		if (MessageBox.Show($"{task.TaskName.Value}を削除しますか？", "確認", MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes)
+		{
+			// Yes以外の時削除しない
+			return;
+		}
+
 		using var db = new TaskDbContext();
 
 		// TaskEntity を ID で検索（ここでは TaskName 等で一意に特定できるよう仮定）
@@ -146,7 +162,8 @@ public class ViewModel
 			await db.SaveChangesAsync();
 		}
 
-		Tasks.Remove(task);
+		AllTasks.Remove(task);
+		ExecuteFilter();
 	}
 
 	/// <summary>
@@ -184,6 +201,7 @@ public class ViewModel
 				entity.Remarks = task.Remarks.Value;
 
 				await db.SaveChangesAsync();
+				ExecuteFilter();
 			}
 		}
 	}
@@ -193,6 +211,12 @@ public class ViewModel
 	/// </summary>
 	private void OnExportToExcel()
 	{
+		if (FilteredTasks.Count == 0)
+		{
+			MessageBox.Show("出力対象のデータが存在しません。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+			return;
+		}
+
 		try
 		{
 			var dialog = new Microsoft.Win32.SaveFileDialog
@@ -220,7 +244,7 @@ public class ViewModel
 
 			// データ行
 			int row = 2;
-			foreach (var task in Tasks)
+			foreach (var task in FilteredTasks)
 			{
 				worksheet.Cell(row, 1).Value = task.TaskName.Value;
 				worksheet.Cell(row, 2).Value = task.StartDate.Value;
@@ -245,6 +269,30 @@ public class ViewModel
 		catch (Exception ex)
 		{
 			MessageBox.Show($"Excel出力中にエラーが発生しました：{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
+		}
+	}
+
+	/// <summary>
+	/// 絞り込みを実行する
+	/// </summary>
+	private void ExecuteFilter()
+	{
+		if(FilterDate.Value is null)
+		{
+			MessageBox.Show("基準日を設定してください。", "エラー", MessageBoxButton.OK, MessageBoxImage.Information);
+			return;
+		}
+
+		FilteredTasks.Clear();
+
+		var filtered = AllTasks.Where(task =>
+			(SelectedStatusFilter.Value == "すべて" || task.Status.Value == SelectedStatusFilter.Value) &&
+			(task.StartDate.Value <= FilterDate.Value && FilterDate.Value <= task.EndDate.Value)
+		);
+
+		foreach (var task in filtered)
+		{
+			FilteredTasks.Add(task);
 		}
 	}
 
