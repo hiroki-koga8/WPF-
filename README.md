@@ -93,9 +93,16 @@
 <img width="783" height="534" alt="image" src="https://github.com/user-attachments/assets/50505c1b-97f7-4761-8942-b63c68649910" />
 <img width="787" height="492" alt="image" src="https://github.com/user-attachments/assets/53be51a6-9888-44ca-bf8b-86cb263e7273" />
 
-↓出力したExcelファイル
+出力したExcelファイル
 [Tasks_20251004172925.xlsx](https://github.com/user-attachments/files/22694634/Tasks_20251004172925.xlsx)
 
+----
+# 今後追加したい機能・修正したいところ
+
+* タスクの複写（コピー）機能・一括登録機能の追加　複数登録するのがめんどくさい
+* UIの修正　表示ボタン、Excelボタンあたりが変
+* 表示条件は基準日指定しなくても表示できたほうが良いかも
+* 予定工数と実績工数の乖離値計算が正しくない
 
 ----
 # 参考資料
