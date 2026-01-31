@@ -36,11 +36,11 @@ public class ViewModel
 		LoadCommand = new ReactiveCommand();
 		LoadCommand.Subscribe(async () => await LoadTasksFromDbAsync());
 		AddTaskCommand = new ReactiveCommand();
-		AddTaskCommand.Subscribe(OnAddAsync);
+		AddTaskCommand.Subscribe(async _ => await OnAddAsync());
 		DeleteTaskCommand = SelectedTask.Select(task => task != null).ToReactiveCommand();
-		DeleteTaskCommand.Subscribe(OnDeleteAsync);
+		DeleteTaskCommand.Subscribe(async _ => await OnDeleteAsync());
 		EditTaskCommand = SelectedTask.Select(task => task != null).ToReactiveCommand();
-		EditTaskCommand.Subscribe(OnEditAsync);
+		EditTaskCommand.Subscribe(async _ => await OnEditAsync());
 		ExportToExcelCommand = new ReactiveCommand();
 		ExportToExcelCommand.Subscribe(OnExportToExcel);
 
@@ -90,7 +90,7 @@ public class ViewModel
 	/// <summary>
 	/// 新規追加の処理
 	/// </summary>
-	private async void OnAddAsync()
+	private async Task OnAddAsync()
 	{
 		var newTask = new TaskItem
 		{
@@ -138,7 +138,7 @@ public class ViewModel
 	/// 削除時の処理
 	/// </summary>
 	/// <param name="_"></param>
-	private async void OnDeleteAsync()
+	private async Task OnDeleteAsync()
 	{
 		var task = SelectedTask.Value;
 		if (task == null)
@@ -172,7 +172,7 @@ public class ViewModel
 	/// <summary>
 	/// 編集時の処理
 	/// </summary>
-	private async void OnEditAsync()
+	private async Task OnEditAsync()
 	{
 		if (SelectedTask.Value == null)
 			return;
