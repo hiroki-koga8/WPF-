@@ -10,7 +10,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfApp1.ViewModels;
 
-namespace WpfApp1;
+namespace WpfApp1.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -20,6 +20,12 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-		DataContext = new ViewModel();
+
+		var messageService = new MessageService();
+		var dialogService = new DialogService();
+
+		DataContext = new ViewModel(
+			messageService,
+			dialogService);
 	}
 }

@@ -28,11 +28,21 @@ public class ViewModel
 
 	public ReadOnlyCollection<string> FilterOptions { get; } = new(new[] { "すべて", "未対応", "対応中", "完了" });
 
+	#region プライベートフィールド
+	private readonly IMessageService _message;
+	private readonly IDialogService _dialog;
+	#endregion
+
 	/// <summary>
 	/// コンストラクタ
 	/// </summary>
-	public ViewModel()
+	public ViewModel(
+		IMessageService message,
+		IDialogService dialog)
 	{
+		_message = message;
+		_dialog = dialog;
+
 		LoadCommand = new ReactiveCommand();
 		LoadCommand.Subscribe(async () => await LoadTasksFromDbAsync());
 		AddTaskCommand = new ReactiveCommand();
