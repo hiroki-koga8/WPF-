@@ -11,6 +11,7 @@
         <!-- 上部のボタン -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="新規登録" Command="{Binding AddTaskCommand}" Width="100" Margin="5"/>
+            <Button Content="複写" Command="{Binding CopyTaskCommand}" Width="100" Margin="5"/>
         </StackPanel>
 
 
@@ -49,7 +50,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="編集">
+                <DataGridTemplateColumn Header="削除">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Button Content="削除" 

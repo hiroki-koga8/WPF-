@@ -19,12 +19,34 @@ public class ViewModel
 	public ReactiveProperty<string> SelectedStatusFilter { get; } = new("すべて");
 	public ReactiveProperty<DateTime?> FilterDate { get; } = new(DateTime.Today);
 
+	/// <summary>
+	/// 画面起動時のコマンド
+	/// </summary>
 	public ReactiveCommand LoadCommand { get; }
+	/// <summary>
+	/// タスク追加時のコマンド
+	/// </summary>
 	public ReactiveCommand AddTaskCommand { get; }
+	/// <summary>
+	/// タスク絞り込みのコマンド
+	/// </summary>
 	public ReactiveCommand FilterCommand { get; } = new();
+	/// <summary>
+	/// 削除コマンド
+	/// </summary>
 	public ReactiveCommand DeleteTaskCommand { get; }
+	/// <summary>
+	/// タスク編集コマンド
+	/// </summary>
 	public ReactiveCommand EditTaskCommand { get; }
+	/// <summary>
+	/// エクセル出力コマンド
+	/// </summary>
 	public ReactiveCommand ExportToExcelCommand { get; }
+	/// <summary>
+	/// 複写コマンド
+	/// </summary>
+	public ReactiveCommand CopyTaskCommand { get; }
 
 	public ReadOnlyCollection<string> FilterOptions { get; } = new(new[] { "すべて", "未対応", "対応中", "完了" });
 
@@ -53,6 +75,12 @@ public class ViewModel
 		EditTaskCommand.Subscribe(async _ => await OnEditAsync());
 		ExportToExcelCommand = new ReactiveCommand();
 		ExportToExcelCommand.Subscribe(OnExportToExcel);
+
+		CopyTaskCommand = SelectedTask
+			.Select(task => task != null)
+			.ToReactiveCommand();
+
+		CopyTaskCommand.Subscribe(async _ => await OnCopyAsync());
 
 		FilterCommand.Subscribe(ExecuteFilter);
 
@@ -281,6 +309,55 @@ public class ViewModel
 		{
 			MessageBox.Show($"Excel出力中にエラーが発生しました：{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
+	}
+
+	/// <summary>
+	/// 複写処理
+	/// </summary>
+	/// <returns></returns>
+	private async Task OnCopyAsync()
+	{
+		var source = SelectedTask.Value;
+		if (source == null)
+			return;
+
+		// コピー作成（Idはコピーしない）
+		var copy = new TaskItem
+		{
+			TaskName = { Value = source.TaskName.Value + "（コピー）" },
+			StartDate = { Value = source.StartDate.Value },
+			EndDate = { Value = source.EndDate.Value },
+			Description = { Value = source.Description.Value },
+			Status = { Value = source.Status.Value },
+			PlannedHours = { Value = source.PlannedHours.Value },
+			ActualHours = { Value = source.ActualHours.Value },
+			Remarks = { Value = source.Remarks.Value }
+		};
+
+		// 確認ダイアログを出すならここ
+		// if (!_dialog.ShowEditTaskDialog(copy)) return;
+
+		using var db = new TaskDbContext();
+
+		var entity = new TaskEntity
+		{
+			TaskName = copy.TaskName.Value,
+			StartDate = copy.StartDate.Value,
+			EndDate = copy.EndDate.Value,
+			Description = copy.Description.Value,
+			Status = copy.Status.Value,
+			PlannedHours = copy.PlannedHours.Value,
+			ActualHours = copy.ActualHours.Value,
+			Remarks = copy.Remarks.Value
+		};
+
+		db.Tasks.Add(entity);
+		await db.SaveChangesAsync();
+
+		copy.Id = entity.Id;
+
+		AllTasks.Add(copy);
+		ExecuteFilter();
 	}
 
 	/// <summary>
