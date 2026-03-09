@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Reactive.Bindings;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
@@ -44,6 +45,10 @@ public class ViewModel
 	/// </summary>
 	public ReactiveCommand ExportToExcelCommand { get; }
 	/// <summary>
+	/// CSV出力コマンド
+	/// </summary>
+	public ReactiveCommand ExportToCsvCommand { get; }
+	/// <summary>
 	/// 複写コマンド
 	/// </summary>
 	public ReactiveCommand CopyTaskCommand { get; }
@@ -75,6 +80,8 @@ public class ViewModel
 		EditTaskCommand.Subscribe(async _ => await OnEditAsync());
 		ExportToExcelCommand = new ReactiveCommand();
 		ExportToExcelCommand.Subscribe(OnExportToExcel);
+		ExportToCsvCommand = new ReactiveCommand();
+		ExportToCsvCommand.Subscribe(OnExportToCsv);
 
 		CopyTaskCommand = SelectedTask
 			.Select(task => task != null)
@@ -310,6 +317,70 @@ public class ViewModel
 			MessageBox.Show($"Excel出力中にエラーが発生しました：{ex.Message}", "エラー", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 	}
+
+	private void OnExportToCsv()
+	{
+		if (FilteredTasks.Count == 0)
+		{
+			_message.ShowInfo("出力対象のデータが存在しません。");
+			return;
+		}
+
+		try
+		{
+			var dialog = new Microsoft.Win32.SaveFileDialog
+			{
+				Filter = "CSVファイル (*.csv)|*.csv",
+				FileName = $"Tasks_{DateTime.Now:yyyyMMddHHmmss}.csv"
+			};
+
+			if (dialog.ShowDialog() != true)
+				return;
+
+			var lines = new List<string>();
+
+			// ヘッダー
+			lines.Add("タスク名,開始日,終了日,状態,予定工数,実績工数,差分,説明,備考");
+
+			foreach (var task in FilteredTasks)
+			{
+				var line = string.Join(",",
+					EscapeCsv(task.TaskName.Value),
+					task.StartDate.Value.ToString("yyyy/MM/dd"),
+					task.EndDate.Value.ToString("yyyy/MM/dd"),
+					EscapeCsv(task.Status.Value),
+					task.PlannedHours.Value,
+					task.ActualHours.Value,
+					task.Gap.Value,
+					EscapeCsv(task.Description.Value),
+					EscapeCsv(task.Remarks.Value)
+				);
+
+				lines.Add(line);
+			}
+
+			File.WriteAllLines(dialog.FileName, lines, System.Text.Encoding.UTF8);
+
+			_message.ShowInfo("CSVファイルに出力しました。");
+		}
+		catch (Exception ex)
+		{
+			_message.ShowError($"CSV出力中にエラーが発生しました：{ex.Message}");
+		}
+	}
+	private string EscapeCsv(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+			return "";
+
+		if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+		{
+			return $"\"{value.Replace("\"", "\"\"")}\"";
+		}
+
+		return value;
+	}
+
 
 	/// <summary>
 	/// 複写処理
